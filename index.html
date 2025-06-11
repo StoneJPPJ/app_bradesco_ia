@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bradesco - Assistente de Empréstimos</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header do Bradesco -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-university"></i>
+                    <span>Bradesco</span>
+                </div>
+                <h1>Assistente de Empréstimos</h1>
+            </div>
+        </header>
+
+        <!-- Container do Chat -->
+        <div class="chat-container">
+            <!-- Área de mensagens -->
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <p>Olá! Sou o assistente virtual do Bradesco. Como posso ajudá-lo com seu empréstimo hoje?</p>
+                        <span class="message-time">Agora</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Opções rápidas -->
+            <div class="quick-options" id="quickOptions">
+                <h3>Opções de consulta:</h3>
+                <div class="options-grid">
+                    <button class="option-btn" data-option="agencia">
+                        <i class="fas fa-building"></i>
+                        Onde foi feito o empréstimo
+                    </button>
+                    <button class="option-btn" data-option="detalhes">
+                        <i class="fas fa-info-circle"></i>
+                        Detalhes do empréstimo
+                    </button>
+                    <button class="option-btn" data-option="status">
+                        <i class="fas fa-chart-line"></i>
+                        Status do empréstimo
+                    </button>
+                    <button class="option-btn" data-option="agente">
+                        <i class="fas fa-headset"></i>
+                        Falar com especialista
+                    </button>
+                </div>
+            </div>
+
+            <!-- Área de input -->
+            <div class="chat-input-area">
+                <div class="chat-input-container">
+                    <input type="text" 
+                           id="messageInput" 
+                           placeholder="Digite sua mensagem..." 
+                           maxlength="500">
+                    <button id="sendButton" class="send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="typing-indicator" id="typingIndicator" style="display: none;">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>Consultando informações...</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
