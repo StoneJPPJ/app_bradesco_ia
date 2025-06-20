@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Conectividade API</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        button { padding: 10px 20px; margin: 10px; background: #cc0000; color: white; border: none; cursor: pointer; }
+        .result { margin: 10px 0; padding: 10px; background: #f0f0f0; border-left: 4px solid #cc0000; }
+        .error { background: #ffe6e6; border-color: #ff0000; }
+        .success { background: #e6ffe6; border-color: #00aa00; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Teste de Conectividade - Bradesco ChatBot API</h1>
+    
+    <button onclick="testarHealth()">Testar Health Check</button>
+    <button onclick="testarAuth()">Testar Autenticação</button>
+    <button onclick="testarChatbot()">Testar ChatBot</button>
+    
+    <div id="resultados"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:8081';
+        
+        function log(message, isError = false) {
+            const div = document.createElement('div');
+            div.className = `result ${isError ? 'error' : 'success'}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            document.getElementById('resultados').appendChild(div);
+        }
+        
+        async function testarHealth() {
+            try {
+                log('🔍 Testando Health Check...');
+                const response = await fetch(`${API_BASE}/api/health`);
+                const data = await response.text();
+                log(`✅ Health Check OK: ${data}`);
+            } catch (error) {
+                log(`❌ Erro no Health Check: ${error.message}`, true);
+            }
+        }
+        
+        async function testarAuth() {
+            try {
+                log('🔍 Testando Autenticação com "Lucas Silva"...');
+                const response = await fetch(`${API_BASE}/api/auth`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        identificador: 'Lucas Silva',
+                        sessionId: 'test-session-123'
+                    })
+                });
+                const data = await response.json();
+                log(`✅ Autenticação: ${JSON.stringify(data, null, 2)}`);
+            } catch (error) {
+                log(`❌ Erro na Autenticação: ${error.message}`, true);
+            }
+        }
+        
+        async function testarChatbot() {
+            try {
+                log('🔍 Testando ChatBot...');
+                const response = await fetch(`${API_BASE}/api/chatbot`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Olá',
+                        sessionId: 'test-session-123',
+                        timestamp: new Date().toISOString()
+                    })
+                });
+                const data = await response.json();
+                log(`✅ ChatBot: ${JSON.stringify(data, null, 2)}`);
+            } catch (error) {
+                log(`❌ Erro no ChatBot: ${error.message}`, true);
+            }
+        }
+    </script>
+</body>
+</html> 

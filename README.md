@@ -1,248 +1,431 @@
-# 🏦 Bradesco - Chatbot de Empréstimos
+# 🏦 Bradesco - Sistema de ChatBot para Empréstimos
 
-Sistema de chatbot web para consulta de informações sobre empréstimos bancários, desenvolvido para integração com API REST Java.
+## 📋 Visão Geral do Projeto
 
-## 📋 Sobre o Projeto
+Sistema completo de chatbot bancário desenvolvido para auxiliar clientes do Bradesco com consultas sobre empréstimos. O projeto integra tecnologias modernas de desenvolvimento web e Java, oferecendo uma interface intuitiva e funcionalidades robustas de backend.
 
-Este projeto foi desenvolvido como parte da disciplina "Estruturas de Dados e Algoritmos" e consiste em uma interface web moderna para um chatbot que auxilia clientes do Bradesco com informações sobre seus empréstimos.
+### 🎯 Objetivo Acadêmico
+Este projeto foi desenvolvido como parte da disciplina **"Estrutura de Dados e Algoritmos"** com foco em:
+- Implementação de estruturas de dados eficientes
+- Algoritmos de busca e manipulação de dados
+- Integração com banco de dados SQL Server
+- Desenvolvimento de API REST
+- Interface web responsiva
 
-### ✨ Funcionalidades
+---
 
-- 🏢 **Consulta de Agência**: Informações sobre onde o empréstimo foi realizado
-- 📊 **Detalhes do Empréstimo**: Valor total, parcelas, datas de vencimento
-- 📈 **Status do Empréstimo**: Situação atual, parcelas pendentes
-- 👩‍💼 **Contato com Especialista**: Conexão direta com agente de empréstimos
-- 💬 **Chat Interativo**: Interface moderna com histórico de conversas
-- 📱 **Design Responsivo**: Funciona perfeitamente em mobile e desktop
+## 🏗️ Arquitetura do Sistema
 
-## 🎨 Design
+### 📁 Estrutura Organizacional
 
-A interface utiliza as cores oficiais do Banco Bradesco:
-- **Vermelho Principal**: `#CC092F`
-- **Vermelho Escuro**: `#A50725`  
-- **Vermelho Claro**: `#E6394B`
-- **Branco e Cinzas**: Para contraste e legibilidade
-
-## 🚀 Como Usar
-
-### 1. Execução Local
-
-```bash
-# Clone ou faça download dos arquivos
-# Abra o arquivo index.html em um navegador web
+```
+Projeto-A3/
+├── 📂 src/
+│   └── main/
+│       ├── java/com/bradesco/chatbot/
+│       │   ├── ChatBotBradesco.java          # Aplicação principal
+│       │   └── BradescoChatBotCompleto.java  # Versão alternativa
+│       └── resources/
+│           └── application.properties        # Configurações Spring
+├── 📂 frontend/
+│   ├── index.html                           # Interface principal
+│   └── assets/
+│       ├── css/
+│       │   └── styles.css                   # Estilos visuais
+│       └── js/
+│           └── script.js                    # Lógica frontend
+├── 📂 database/
+│   └── dados_teste.sql                      # Estrutura e dados de teste
+├── 📂 config/
+│   └── config.properties                    # Configurações gerais
+├── 📂 docs/                                 # Documentação
+├── 📂 lib/
+│   └── mssql-jdbc-12.10.0.jre11.jar       # Driver SQL Server
+├── 📂 target/                               # Artefatos compilados
+├── pom.xml                                  # Configuração Maven
+└── README.md                                # Este arquivo
 ```
 
-### 2. Servidor Local (Recomendado)
+### 💻 Tecnologias Utilizadas
+
+#### Backend
+- **Java 17** - Linguagem principal
+- **Maven** - Gerenciamento de dependências
+- **Spring Boot** - Framework de desenvolvimento
+- **SQL Server** - Banco de dados
+- **HttpServer** - Servidor HTTP nativo Java
+- **Gemini AI** - Integração com IA generativa
+
+#### Frontend
+- **HTML5** - Estrutura da página
+- **CSS3** - Estilização avançada
+- **JavaScript (ES6+)** - Lógica de interação
+- **Font Awesome** - Ícones
+- **Google Fonts** - Tipografia
+
+---
+
+## ⚙️ Funcionalidades Implementadas
+
+### 🔐 Sistema de Autenticação
+- Validação de cliente por ID ou nome
+- Sistema de sessões seguras
+- Integração com base de dados real
+
+### 💬 Chatbot Inteligente
+- **Consulta de Agência**: Onde o empréstimo foi realizado
+- **Detalhes do Empréstimo**: Valores, parcelas, datas
+- **Status do Empréstimo**: Situação atual das parcelas
+- **Contato com Especialista**: Conexão com agentes
+
+### 🎨 Interface Moderna
+- Design responsivo (mobile-first)
+- Cores oficiais do Bradesco
+- Animações e transições suaves
+- Feedback visual em tempo real
+
+---
+
+## 🚀 Como Executar o Projeto
+
+### 📋 Pré-requisitos
+
+1. **Java 17+** instalado
+2. **Maven 3.6+** configurado
+3. **SQL Server** rodando
+4. **Navegador moderno** (Chrome, Firefox, Edge)
+
+### 🔧 Configuração do Banco de Dados
+
+1. Execute o script de criação:
+```sql
+-- Execute o arquivo: database/dados_teste.sql
+```
+
+2. Configure as credenciais em `src/main/resources/application.properties`:
+```properties
+# Configurações do banco
+spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=bradesco
+spring.datasource.username=seu_usuario
+spring.datasource.password=sua_senha
+```
+
+### 📡 Executando o Backend
 
 ```bash
-# Com Python 3
+# 1. Navegue para o diretório do projeto
+cd Projeto-A3
+
+# 2. Compile o projeto
+mvn clean compile
+
+# 3. Execute a aplicação principal
+mvn exec:java -Dexec.mainClass="com.bradesco.chatbot.ChatBotBradesco"
+
+# Ou execute a versão alternativa
+mvn exec:java -Dexec.mainClass="com.bradesco.chatbot.BradescoChatBotCompleto"
+```
+
+### 🌐 Executando o Frontend
+
+```bash
+# Opção 1: Servidor HTTP simples com Python
+cd frontend
 python -m http.server 8000
 
-# Com Node.js (http-server)
-npx http-server
+# Opção 2: Servidor HTTP com Node.js
+npx http-server frontend
 
 # Acesse: http://localhost:8000
 ```
 
-### 3. Teste as Funcionalidades
+---
 
-- Clique nos botões de opções rápidas
-- Digite mensagens como "onde foi feito", "detalhes", "status"
-- Teste a opção "Falar com especialista"
+## 🧪 Testando o Sistema
 
-## 🔗 Integração com API REST
+### 👥 Usuários de Teste
 
-### Configuração da API
+| ID Cliente | Nome | Telefone | Empréstimo |
+|------------|------|----------|------------|
+| 12345 | João Silva | (11) 99999-9999 | R$ 25.000,00 |
+| 67890 | Maria Santos | (11) 88888-8888 | R$ 15.000,00 |
+| 11111 | Carlos Oliveira | (11) 77777-7777 | R$ 50.000,00 |
+| 54321 | Ana Costa | (11) 66666-6666 | R$ 30.000,00 |
+| 98765 | Pedro Fernandes | (11) 55555-5555 | R$ 20.000,00 |
 
-No arquivo `script.js`, localize a seção de configuração:
+### 🔍 Endpoints da API
 
-```javascript
-const CONFIG = {
-    API_BASE_URL: 'http://localhost:8080', // ✏️ Altere para seu backend
-    ENDPOINTS: {
-        CHAT: '/chatbot',
-        LOAN_DETAILS: '/emprestimo/detalhes',
-        LOAN_STATUS: '/emprestimo/status',
-        AGENCY_INFO: '/emprestimo/agencia',
-        CONTACT_AGENT: '/agente/contato'
-    }
-};
-```
-
-### Função Principal de Integração
-
-A função `sendToAPI()` é o **ponto principal de conexão** com seu backend:
-
-```javascript
-// 📍 LINHA ~142 em script.js
-async sendToAPI(message, endpoint = CONFIG.ENDPOINTS.CHAT) {
-    const url = `${CONFIG.API_BASE_URL}${endpoint}`;
-    
-    const requestBody = {
-        message: message,
-        timestamp: new Date().toISOString(),
-        sessionId: this.generateSessionId(),
-        userContext: {
-            messageCount: this.messageCount++,
-            lastActivity: Date.now()
-        }
-    };
-
-    // 🔥 DESCOMENTE ESTE BLOCO QUANDO A API ESTIVER PRONTA:
-    /*
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            // 'Authorization': 'Bearer your-token' // Se necessário
-        },
-        body: JSON.stringify(requestBody)
-    });
-
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-    */
-}
-```
-
-### Estrutura de Resposta Esperada
-
-Seu backend Java deve retornar JSON no seguinte formato:
-
-```json
-{
-    "type": "loan_details",
-    "message": "Aqui estão os detalhes do seu empréstimo:",
-    "data": {
-        "valor_total": "R$ 15.000,00",
-        "valor_parcela": "R$ 1.250,00",
-        "parcelas_totais": 12,
-        "parcelas_pagas": 8,
-        "próximo_vencimento": "15/12/2024"
-    }
-}
-```
-
-### Tipos de Resposta Suportados
-
-| Tipo | Descrição | Campos de Data |
-|------|-----------|----------------|
-| `agency_info` | Informações da agência | `agencia`, `endereco`, `telefone` |
-| `loan_details` | Detalhes do empréstimo | `valor_total`, `valor_parcela`, `parcelas_totais`, etc. |
-| `loan_status` | Status atual | `status`, `parcelas_pendentes`, `valor_pendente` |
-| `contact_agent` | Contato especialista | `agent_name`, `available`, `phone`, `email` |
-| `general` | Resposta genérica | Apenas `message` |
-
-## 🛠️ Estrutura dos Arquivos
-
-```
-projeto-chatbot/
-├── index.html          # Página principal
-├── styles.css          # Estilos (tema Bradesco)
-├── script.js           # Lógica do chatbot + integração API
-└── README.md           # Documentação
-```
-
-## 🧪 Desenvolvimento e Debug
-
-### Funções Utilitárias
-
-O sistema inclui funções para facilitar o desenvolvimento:
-
-```javascript
-// No console do navegador:
-
-// Testar conexão com API
-testAPI()
-
-// Limpar histórico de chat
-clearChat()
-
-// Acessar instância do chatbot
-window.chatbot
-```
-
-### Logs de Debug
-
-O sistema gera logs detalhados no console:
-
-- `💬` Inicialização do chatbot
-- `📡` Chamadas para API
-- `❌` Erros de comunicação
-- `✅` Sucessos de operação
-
-## 📱 Responsividade
-
-A interface é otimizada para:
-
-- **Desktop**: Layout com sidebar para opções
-- **Tablet**: Layout adaptado com botões menores
-- **Mobile**: Interface full-screen otimizada
-
-## 🔒 Segurança
-
-### Headers Recomendados
-
-Para produção, configure no seu backend:
-
-```http
-Access-Control-Allow-Origin: https://seu-dominio.com
-Access-Control-Allow-Methods: POST, GET, OPTIONS
-Access-Control-Allow-Headers: Content-Type, Authorization
-```
-
-### Autenticação
-
-Para adicionar autenticação, modifique os headers na função `sendToAPI()`:
-
-```javascript
-headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${userToken}`
-}
-```
-
-## 🚀 Deploy
-
-### Para Produção
-
-1. **Frontend**: Hospede os arquivos em qualquer servidor web
-2. **Backend**: Configure CORS para permitir origem do frontend
-3. **URL da API**: Atualize `CONFIG.API_BASE_URL` para URL de produção
-
-### Exemplo de Deploy
-
-```javascript
-// Para produção
-const CONFIG = {
-    API_BASE_URL: 'https://api.bradesco-emprestimos.com',
-    // ... resto da configuração
-};
-```
-
-## 📞 Suporte
-
-Para dúvidas sobre integração:
-
-1. Verifique os logs no console do navegador
-2. Teste a função `testAPI()` 
-3. Confirme se o backend está respondendo nos endpoints corretos
-4. Verifique configurações de CORS
-
-## 🎯 Próximos Passos
-
-- [ ] Implementar autenticação de usuário
-- [ ] Adicionar notificações push
-- [ ] Integrar com sistema de tickets
-- [ ] Adicionar histórico persistente
-- [ ] Implementar chat em tempo real (WebSocket)
+| Endpoint | Método | Descrição |
+|----------|--------|-----------|
+| `/api/health` | GET | Status do sistema |
+| `/api/auth` | POST | Autenticação de cliente |
+| `/api/chatbot` | POST | Chat principal |
+| `/api/emprestimo/detalhes` | GET | Detalhes do empréstimo |
+| `/api/emprestimo/status` | GET | Status das parcelas |
+| `/api/emprestimo/agencia` | GET | Informações da agência |
+| `/api/agente/contato` | POST | Contato com especialista |
 
 ---
 
-**Desenvolvido para o projeto acadêmico de Estruturas de Dados e Algoritmos**
+## 📊 Estruturas de Dados Utilizadas
 
-Tema: Sistema de Notificação de Empréstimos Pendentes - Banco Bradesco 
+### 🗂️ Principais Estruturas
+
+#### 1. **ConcurrentHashMap** - Gestão de Sessões
+```java
+private static final Map<String, ClienteInfo> clientesLogados = new ConcurrentHashMap<>();
+```
+- **Vantagem**: Thread-safe para aplicações concorrentes
+- **Uso**: Armazenar clientes autenticados por sessão
+
+#### 2. **ArrayList** - Histórico de Mensagens
+```java
+private static final Map<String, List<Message>> sessionHistories = new ConcurrentHashMap<>();
+```
+- **Vantagem**: Acesso sequencial otimizado
+- **Uso**: Manter histórico de conversas por sessão
+
+#### 3. **Record Classes** - Estruturas Imutáveis
+```java
+private static record Message(String role, String text) {}
+```
+- **Vantagem**: Imutabilidade e performance
+- **Uso**: Representar mensagens do chat
+
+### 🔍 Algoritmos Implementados
+
+#### 1. **Busca por Identificador**
+```java
+private static ClienteInfo buscarClienteNoBanco(String identificador) {
+    // Busca otimizada por ID ou nome usando PreparedStatement
+}
+```
+
+#### 2. **Cálculo de Status de Empréstimo**
+```java
+private static Map<String, Object> calcularStatusEmprestimo(String idCliente) {
+    // Algoritmo para calcular parcelas pagas baseado em datas
+}
+```
+
+---
+
+## 🌐 Opções de Deploy
+
+### 🚀 Deploy Local (Desenvolvimento)
+
+**Vantagens:**
+- Controle total do ambiente
+- Debug facilitado
+- Sem custos de hospedagem
+
+**Comandos:**
+```bash
+# Backend
+mvn spring-boot:run
+
+# Frontend
+python -m http.server 8000
+```
+
+### ☁️ Deploy em Nuvem
+
+#### 1. **Heroku** (Recomendado para início)
+```bash
+# Instale o Heroku CLI
+# Configure Procfile
+echo "web: java -jar target/chatbot-1.0.0.jar" > Procfile
+
+# Deploy
+heroku create bradesco-chatbot
+git add .
+git commit -m "Deploy inicial"
+git push heroku main
+```
+
+#### 2. **AWS EC2**
+```bash
+# 1. Configure instância EC2
+# 2. Instale Java 17 e Maven
+# 3. Configure SQL Server (RDS)
+# 4. Execute aplicação
+```
+
+#### 3. **Railway** (Alternativa moderna)
+```bash
+# 1. Conecte repositório GitHub
+# 2. Configure variáveis de ambiente
+# 3. Deploy automático
+```
+
+### 🗄️ Opções de Banco de Dados
+
+#### Desenvolvimento
+- **SQL Server Local** - Desenvolvimento e testes
+
+#### Produção
+- **Azure SQL Database** - Integração nativa Microsoft
+- **AWS RDS SQL Server** - Alta disponibilidade
+- **Google Cloud SQL** - Escalabilidade automática
+
+---
+
+## 🔧 Configurações Avançadas
+
+### 🔐 Variáveis de Ambiente
+
+```bash
+# Backend
+export DB_URL="jdbc:sqlserver://localhost:1433;databaseName=bradesco"
+export DB_USER="usuario_java"
+export DB_PASSWORD="senha_segura"
+export GEMINI_API_KEY="sua_api_key_gemini"
+
+# Frontend
+export API_BASE_URL="http://localhost:8080"
+```
+
+### ⚡ Otimizações de Performance
+
+#### Backend
+```java
+// Pool de conexões
+spring.datasource.hikari.maximum-pool-size=20
+spring.datasource.hikari.minimum-idle=5
+
+// Cache de consultas
+spring.jpa.properties.hibernate.cache.use_second_level_cache=true
+```
+
+#### Frontend
+```javascript
+// Debounce em pesquisas
+const debouncedSearch = debounce(searchFunction, 300);
+
+// Cache de resultados
+const responseCache = new Map();
+```
+
+---
+
+## 📈 Monitoramento e Logs
+
+### 📊 Métricas Importantes
+- Tempo de resposta da API
+- Taxa de autenticação bem-sucedida
+- Número de sessões ativas
+- Erros de banco de dados
+
+### 📝 Sistema de Logs
+```java
+// Configuração de logging
+logging.level.com.bradesco.chatbot=INFO
+logging.pattern.console=%d{yyyy-MM-dd HH:mm:ss} - %msg%n
+```
+
+---
+
+## 🛡️ Segurança
+
+### 🔒 Medidas Implementadas
+- **CORS** configurado para origens específicas
+- **Input Validation** em todos os endpoints
+- **Prepared Statements** contra SQL Injection
+- **Session Management** seguro
+- **Error Handling** sem exposição de dados internos
+
+### 🚨 Recomendações para Produção
+```java
+// Headers de segurança
+response.setHeader("X-Content-Type-Options", "nosniff");
+response.setHeader("X-Frame-Options", "DENY");
+response.setHeader("X-XSS-Protection", "1; mode=block");
+```
+
+---
+
+## 🧪 Testes
+
+### ✅ Testes Unitários
+```bash
+mvn test
+```
+
+### 🔍 Testes de Integração
+```bash
+# Teste de conectividade
+curl http://localhost:8080/api/health
+
+# Teste de autenticação
+curl -X POST http://localhost:8080/api/auth \
+  -H "Content-Type: application/json" \
+  -d '{"identificador":"12345"}'
+```
+
+---
+
+## 📞 Suporte e Documentação
+
+### 🆘 Resolução de Problemas
+
+#### Backend não inicia
+1. Verifique se o Java 17+ está instalado
+2. Confirme as configurações do banco de dados
+3. Verifique se a porta 8080 está disponível
+
+#### Frontend não carrega dados
+1. Confirme se o backend está rodando
+2. Verifique as configurações de CORS
+3. Inspecione o console do navegador
+
+#### Erro de autenticação
+1. Verifique se os dados de teste foram inseridos
+2. Confirme a string de conexão do banco
+3. Teste a consulta SQL manualmente
+
+### 📚 Documentação Adicional
+- [Documentação da API](docs/API.md)
+- [Guia de Desenvolvimento](docs/DESENVOLVIMENTO.md)
+- [Manual do Usuário](docs/USUARIO.md)
+
+---
+
+## 🚀 Próximas Melhorias
+
+### 🎯 Roadmap
+- [ ] **Autenticação JWT** - Segurança aprimorada
+- [ ] **WebSocket** - Chat em tempo real
+- [ ] **Notificações Push** - Alertas automáticos
+- [ ] **Dashboard Administrativo** - Métricas e controle
+- [ ] **Testes Automatizados** - Cobertura completa
+- [ ] **Docker** - Containerização
+- [ ] **CI/CD** - Deploy automatizado
+- [ ] **Monitoramento** - APM integrado
+
+---
+
+## 👥 Contribuidores
+
+**Desenvolvido para o projeto acadêmico:**
+- **Disciplina**: Estrutura de Dados e Algoritmos
+- **Tema**: Sistema de Notificação de Empréstimos Pendentes
+- **Instituição**: Banco Bradesco (Simulação Acadêmica)
+
+---
+
+## 📄 Licença
+
+Este projeto é destinado exclusivamente para fins acadêmicos e educacionais.
+
+---
+
+## 🏆 Conclusão
+
+Este sistema demonstra a aplicação prática de conceitos fundamentais de:
+- **Estruturas de Dados**: HashMap, ArrayList, Records
+- **Algoritmos**: Busca, ordenação, cálculos financeiros
+- **Arquitetura de Software**: Separação de responsabilidades
+- **Integração de Sistemas**: API REST, banco de dados, IA
+- **Interface do Usuário**: Design responsivo e acessível
+
+O projeto está pronto para **desenvolvimento**, **testes** e **deploy em produção** com as configurações adequadas para cada ambiente. 

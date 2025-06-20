@@ -18,7 +18,7 @@
 
 const CONFIG = {
     // 🔗 PONTO DE INTEGRAÇÃO COM A API REST
-    API_BASE_URL: 'http://localhost:8080', // URL do backend Java
+    API_BASE_URL: 'http://localhost:8081', // URL do backend Java
     ENDPOINTS: {
         CHAT: '/chatbot',
         LOAN_DETAILS: '/emprestimo/detalhes',
@@ -45,6 +45,12 @@ class BradescoChatbot {
         
         this.isTyping = false;
         this.messageCount = 0;
+        this.clienteAutenticado = false;
+        this.currentSessionId = this.generateSessionId();
+        this.aguardandoAuth = false;
+        this.modoEspecialista = false;
+        this.emprestimoStatus = null;
+        this.clienteInfo = null;
         
         this.init();
     }
@@ -55,6 +61,14 @@ class BradescoChatbot {
     init() {
         this.setupEventListeners();
         this.setupQuickOptions();
+        
+        // ESCONDE BOTÕES INICIALMENTE
+        this.quickOptions.style.display = 'none';
+        
+        // INICIA COM MENSAGEM DE AUTENTICAÇÃO ORGANIZADA
+        this.addBotMessage('Olá! Bem-vindo ao atendimento Bradesco! 😊\n\nPara te atender melhor, preciso que você se identifique.\n\nPor favor, informe:\n• Seu ID de cliente OU\n• Seu nome completo\n\nDigite sua identificação abaixo:');
+        this.aguardandoAuth = true;
+        
         console.log('💬 Bradesco Chatbot inicializado com sucesso!');
     }
 
@@ -127,7 +141,28 @@ class BradescoChatbot {
         this.showTyping();
 
         try {
-            // 🔗 CHAMADA PARA A API REST
+            // Se está aguardando autenticação, processa como identificação
+            if (!this.clienteAutenticado) {
+                await this.processarAutenticacao(message);
+                return;
+            }
+            
+            // Se está no modo especialista, envia para o endpoint do especialista
+            if (this.modoEspecialista) {
+                await this.enviarParaEspecialista(message);
+                return;
+            }
+            
+            // Verifica se o usuário quer falar com especialista
+            if (message.toLowerCase().includes('especialista')) {
+                this.addBotMessage('🎧 Conectando você com nossa especialista Maria Silva...');
+                this.addBotMessage('Você pode fazer uma pergunta específica sobre empréstimos ou receber informações de contato. Digite sua dúvida:');
+                this.modoEspecialista = true;
+                this.messageInput.placeholder = 'Digite sua dúvida sobre empréstimos...';
+                return;
+            }
+            
+            // 🔗 CHAMADA PARA A API REST (só depois de autenticado)
             const response = await this.sendToAPI(message);
             
             // Processa resposta
@@ -142,120 +177,46 @@ class BradescoChatbot {
     }
 
     /**
-     * 🔗 INTEGRAÇÃO COM API REST - PONTO PRINCIPAL DE CONEXÃO
+     * 🔗 INTEGRAÇÃO COM API REST - CONEXÃO REAL COM SEU BACKEND JAVA
      * 
-     * Esta função é responsável por enviar dados para o backend Java
-     * Modifique esta função conforme a estrutura da sua API
+     * Esta função agora se conecta diretamente com sua API Java
      */
-    async sendToAPI(message, endpoint = CONFIG.ENDPOINTS.CHAT) {
+    async sendToAPI(message, endpoint = '/api/chatbot') {
         const url = `${CONFIG.API_BASE_URL}${endpoint}`;
         
         const requestBody = {
             message: message,
-            timestamp: new Date().toISOString(),
-            sessionId: this.generateSessionId(),
-            userContext: {
-                messageCount: this.messageCount++,
-                lastActivity: Date.now()
+            sessionId: this.currentSessionId,
+            timestamp: new Date().toISOString()
+        };
+
+        console.log('📡 Enviando para API Java:', url, requestBody);
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-        };
 
-        console.log('📡 Enviando para API:', url, requestBody);
-
-        // Simula chamada API para demonstração
-        // SUBSTITUA este bloco pela chamada real quando o backend estiver pronto
-        return await this.simulateAPICall(requestBody);
-
-        /* 
-        // 🔥 DESCOMENTE E USE ESTE BLOCO QUANDO A API ESTIVER PRONTA:
-        
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                // Adicione headers de autenticação se necessário
-                // 'Authorization': 'Bearer your-token'
-            },
-            body: JSON.stringify(requestBody)
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            console.log('✅ Resposta da API:', data);
+            return data;
+            
+        } catch (error) {
+            console.error('❌ Erro na API:', error);
+            throw error; // Remove fallback de simulação
         }
-
-        return await response.json();
-        */
     }
 
-    /**
-     * Simula resposta da API (remover quando API real estiver pronta)
-     */
-    async simulateAPICall(requestBody) {
-        // Simula delay da rede
-        await this.delay(1500);
-
-        const message = requestBody.message.toLowerCase();
-        
-        // Simula diferentes tipos de resposta baseado na mensagem
-        if (message.includes('agência') || message.includes('onde')) {
-            return {
-                type: 'agency_info',
-                data: {
-                    agencia: 'Agência Centro - 1234-5',
-                    endereco: 'Rua das Flores, 123 - Centro',
-                    telefone: '(11) 3456-7890'
-                },
-                message: 'Seu empréstimo foi realizado na seguinte agência:'
-            };
-        }
-        
-        if (message.includes('detalhes') || message.includes('valor')) {
-            return {
-                type: 'loan_details',
-                data: {
-                    valor_total: 'R$ 15.000,00',
-                    valor_parcela: 'R$ 1.250,00',
-                    parcelas_totais: 12,
-                    parcelas_pagas: 8,
-                    próximo_vencimento: '15/12/2024'
-                },
-                message: 'Aqui estão os detalhes do seu empréstimo:'
-            };
-        }
-        
-        if (message.includes('status')) {
-            return {
-                type: 'loan_status',
-                data: {
-                    status: 'Em dia',
-                    parcelas_pendentes: 4,
-                    valor_pendente: 'R$ 5.000,00',
-                    ultimo_pagamento: '15/11/2024'
-                },
-                message: 'Status atual do seu empréstimo:'
-            };
-        }
-        
-        if (message.includes('agente') || message.includes('especialista')) {
-            return {
-                type: 'contact_agent',
-                data: {
-                    agent_name: 'Maria Silva',
-                    available: true,
-                    phone: '(11) 3456-7890',
-                    email: 'maria.silva@bradesco.com.br'
-                },
-                message: 'Vou conectá-lo com nossa especialista em empréstimos:'
-            };
-        }
-
-        // Resposta padrão
-        return {
-            type: 'general',
-            message: 'Entendi sua mensagem! Como posso ajudá-lo com informações sobre seu empréstimo? Use as opções abaixo para consultas específicas.'
-        };
-    }
+    // *** FUNÇÃO DE SIMULAÇÃO REMOVIDA - AGORA USA APENAS API REAL ***
 
     /**
      * Processa a resposta do bot
@@ -263,12 +224,206 @@ class BradescoChatbot {
     async processBotResponse(response) {
         await this.delay(CONFIG.MESSAGE_ANIMATION_DELAY);
         
+        // Verifica se precisa de autenticação
+        if (response.type === 'auth_required') {
+            this.aguardandoAuth = true;
+            this.addBotMessage(response.message);
+            this.quickOptions.style.display = 'none'; // Esconde botões até autenticar
+            return;
+        }
+        
         this.addBotMessage(response.message);
         
         // Adiciona informações específicas baseado no tipo
         if (response.data) {
             await this.delay(500);
             this.addBotDataMessage(response.type, response.data);
+        }
+    }
+
+    /**
+     * Processa autenticação do cliente
+     */
+    async processarAutenticacao(identificador) {
+        try {
+            const response = await fetch(`${CONFIG.API_BASE_URL}/api/auth`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    identificador: identificador,
+                    sessionId: this.currentSessionId
+                })
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                this.clienteAutenticado = true;
+                this.aguardandoAuth = false;
+                this.currentSessionId = data.sessionId;
+                
+                // Armazena informações do cliente para controle dos botões
+                this.clienteInfo = data.cliente;
+                
+                this.addBotMessage(`✅ ${data.message}`);
+                this.addBotMessage(`Olá, ${data.cliente.nome}! Agora posso te ajudar com informações sobre seus empréstimos. Use as opções abaixo:`);
+                
+                // Verifica status do empréstimo para controlar visibilidade dos botões
+                await this.verificarStatusEmprestimo();
+                
+                console.log('🎯 Cliente autenticado:', data.cliente);
+            } else {
+                this.addBotMessage(`❌ ${data.message}`);
+                this.addBotMessage('Tente novamente informando seu ID de cliente ou nome completo:');
+            }
+            
+        } catch (error) {
+            console.error('❌ Erro na autenticação:', error);
+            this.addBotMessage('Erro na autenticação. Tente novamente.');
+        }
+    }
+
+    /**
+     * Verifica status do empréstimo para controlar botões
+     */
+    async verificarStatusEmprestimo() {
+        try {
+            const response = await fetch(`${CONFIG.API_BASE_URL}/api/emprestimo/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    sessionId: this.currentSessionId,
+                    message: 'Verificação de status',
+                    timestamp: new Date().toISOString()
+                })
+            });
+
+            const data = await response.json();
+            console.log('🔍 Resposta da verificação de status:', data);
+            
+            if (data.status === "success" && data.data) {
+                const statusEmprestimo = data.data.status;
+                this.emprestimoStatus = statusEmprestimo;
+                
+                console.log('📊 Status detectado:', statusEmprestimo);
+                
+                // Controla visibilidade dos botões baseado no status
+                this.atualizarVisibilidadeBotoes(statusEmprestimo);
+                
+                // Mostra os botões após verificação
+                this.quickOptions.style.display = 'block';
+            } else {
+                console.log('⚠️ Não foi possível verificar status, mostrando todos os botões');
+                console.log('⚠️ Resposta recebida:', data);
+                // Se não conseguir verificar, mostra todos os botões
+                this.quickOptions.style.display = 'block';
+            }
+            
+        } catch (error) {
+            console.error('❌ Erro ao verificar status:', error);
+            // Em caso de erro, mostra todos os botões
+            this.quickOptions.style.display = 'block';
+        }
+    }
+
+    /**
+     * Atualiza visibilidade dos botões baseado no status do empréstimo
+     */
+    atualizarVisibilidadeBotoes(status) {
+        console.log('🔧 Iniciando atualização de visibilidade dos botões...');
+        console.log('📊 Status recebido para verificação:', status);
+        
+        // Aguarda um pouco para garantir que os botões foram renderizados
+        setTimeout(() => {
+            const detalhesBtn = document.querySelector('[data-option="detalhes"]');
+            const allButtons = document.querySelectorAll('.option-btn');
+            
+            console.log('🔍 Total de botões encontrados:', allButtons.length);
+            console.log('🔍 Botão detalhes encontrado:', detalhesBtn ? 'SIM' : 'NÃO');
+            
+            if (detalhesBtn) {
+                // Verifica se é empréstimo pendente (case insensitive)
+                const isPendente = status && (
+                    status.toLowerCase() === 'pendente' || 
+                    status.toUpperCase() === 'PENDENTE' ||
+                    status.toLowerCase().includes('pendente')
+                );
+                
+                console.log('🔍 É empréstimo pendente?', isPendente);
+                
+                if (isPendente) {
+                    // Esconde botão "Detalhes" para empréstimos pendentes
+                    detalhesBtn.style.display = 'none';
+                    detalhesBtn.style.visibility = 'hidden';
+                    detalhesBtn.disabled = true;
+                    console.log('🔒 Botão "Detalhes" ESCONDIDO - Empréstimo pendente');
+                } else {
+                    // Mostra botão "Detalhes" para empréstimos ativos
+                    detalhesBtn.style.display = 'inline-block';
+                    detalhesBtn.style.visibility = 'visible';
+                    detalhesBtn.disabled = false;
+                    console.log('✅ Botão "Detalhes" VISÍVEL - Empréstimo ativo');
+                }
+            } else {
+                console.log('❌ Botão "Detalhes" não encontrado no DOM');
+                console.log('🔍 Botões disponíveis:', Array.from(allButtons).map(btn => btn.dataset.option));
+            }
+        }, 200); // Aumentei o timeout para 200ms
+    }
+
+    /**
+     * Envia mensagem para o especialista
+     */
+    async enviarParaEspecialista(pergunta) {
+        try {
+            const response = await fetch(`${CONFIG.API_BASE_URL}/api/agente/contato`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    sessionId: this.currentSessionId,
+                    message: pergunta,
+                    timestamp: new Date().toISOString()
+                })
+            });
+
+            const data = await response.json();
+            console.log('🔍 Resposta do especialista:', data);
+            
+            if (data.status === "success" && data.type === "contact_agent") {
+                // Se há uma resposta do especialista, mostra ela
+                if (data.data && data.data.message_from_specialist) {
+                    this.addBotMessage(`👩‍💼 **Maria Silva - Especialista Bradesco:**`);
+                    this.addBotMessage(data.data.message_from_specialist);
+                } else {
+                    await this.processBotResponse(data);
+                }
+                
+                // Sai do modo especialista e restaura placeholder
+                this.modoEspecialista = false;
+                this.messageInput.placeholder = 'Digite sua mensagem...';
+                
+                // Adiciona opção de fazer outra pergunta
+                await this.delay(1000);
+                this.addBotMessage('Posso ajudar com mais alguma coisa? Use as opções abaixo ou digite "especialista" para fazer outra pergunta:');
+                
+            } else {
+                console.error('❌ Erro na resposta do especialista:', data);
+                this.addBotMessage('❌ Erro ao conectar com especialista. Tente novamente.');
+                this.modoEspecialista = false;
+                this.messageInput.placeholder = 'Digite sua mensagem...';
+            }
+            
+        } catch (error) {
+            console.error('❌ Erro ao enviar para especialista:', error);
+            this.addBotMessage('❌ Erro na comunicação com especialista. Tente novamente.');
+            this.modoEspecialista = false;
+            this.messageInput.placeholder = 'Digite sua mensagem...';
         }
     }
 
@@ -284,23 +439,49 @@ class BradescoChatbot {
         };
 
         const message = optionTexts[option];
+        
+        // Tratamento especial para o especialista
+        if (option === 'agente') {
+            this.addUserMessage(message);
+            this.addBotMessage('🎧 Conectando você com nossa especialista Bradesquinho...');
+            this.addBotMessage('Você pode fazer uma pergunta específica sobre empréstimos ou receber informações de contato. Digite sua dúvida:');
+            
+            // Ativa modo especialista
+            this.modoEspecialista = true;
+            this.messageInput.placeholder = 'Digite sua dúvida sobre empréstimos...';
+            return;
+        }
+        
         if (message) {
             this.addUserMessage(message);
             this.showTyping();
 
             try {
-                let endpoint = CONFIG.ENDPOINTS.CHAT;
+                let url = `${CONFIG.API_BASE_URL}/api`;
                 
                 // Define endpoint específico baseado na opção
                 switch(option) {
-                    case 'agencia': endpoint = CONFIG.ENDPOINTS.AGENCY_INFO; break;
-                    case 'detalhes': endpoint = CONFIG.ENDPOINTS.LOAN_DETAILS; break;
-                    case 'status': endpoint = CONFIG.ENDPOINTS.LOAN_STATUS; break;
-                    case 'agente': endpoint = CONFIG.ENDPOINTS.CONTACT_AGENT; break;
+                    case 'agencia': url += '/emprestimo/agencia'; break;
+                    case 'detalhes': url += '/emprestimo/detalhes'; break;
+                    case 'status': url += '/emprestimo/status'; break;
+                    default: url += '/chatbot'; break;
                 }
 
-                const response = await this.sendToAPI(message, endpoint);
-                await this.processBotResponse(response);
+                // Para botões, fazemos POST com sessionId no body
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        sessionId: this.currentSessionId,
+                        message: message,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+
+                const data = await response.json();
+                await this.processBotResponse(data);
                 
             } catch (error) {
                 console.error('❌ Erro ao processar opção rápida:', error);
@@ -360,15 +541,32 @@ class BradescoChatbot {
                 break;
                 
             case 'loan_status':
-                content = `
-                    <div class="data-card">
-                        <h4><i class="fas fa-chart-line"></i> Status do Empréstimo</h4>
-                        <p><strong>Status:</strong> <span class="status-badge status-${data.status.toLowerCase().replace(' ', '-')}">${data.status}</span></p>
-                        <p><strong>Parcelas Pendentes:</strong> ${data.parcelas_pendentes}</p>
-                        <p><strong>Valor Pendente:</strong> ${data.valor_pendente}</p>
-                        <p><strong>Último Pagamento:</strong> ${data.ultimo_pagamento}</p>
-                    </div>
-                `;
+                            if (data.status && (data.status.toLowerCase() === 'pendente' || data.status.toUpperCase() === 'PENDENTE')) {
+                // Layout específico para empréstimos pendentes
+                    content = `
+                        <div class="data-card">
+                            <h4><i class="fas fa-clock"></i> Status do Empréstimo</h4>
+                            <p><strong>Status:</strong> <span class="status-badge status-pendente">${data.status}</span></p>
+                            <p><strong>Valor do Empréstimo:</strong> ${data.valor_solicitado || data.valor_total}</p>
+                            <p><strong>Data de Solicitação:</strong> ${data.data_solicitacao}</p>
+                            <p><strong>Tipo de Formalização:</strong> ${data.tipo_formalizacao || 'Não informado'}</p>
+                            <p><strong>Situação:</strong> ${data.situacao || 'Em análise'}</p>
+                            <p><strong>Previsão de Liberação:</strong> ${data.previsao_liberacao || '2-3 dias úteis'}</p>
+                        </div>
+                    `;
+                } else {
+                    // Layout para empréstimos ativos
+                    content = `
+                        <div class="data-card">
+                            <h4><i class="fas fa-chart-line"></i> Status do Empréstimo</h4>
+                            <p><strong>Status:</strong> <span class="status-badge status-${data.status.toLowerCase().replace(' ', '-')}">${data.status}</span></p>
+                            <p><strong>Tipo de Formalização:</strong> ${data.tipo_formalizacao || 'Não informado'}</p>
+                            <p><strong>Parcelas Pendentes:</strong> ${data.parcelas_pendentes}</p>
+                            <p><strong>Valor Pendente:</strong> ${data.valor_pendente}</p>
+                            <p><strong>Último Pagamento:</strong> ${data.ultimo_pagamento}</p>
+                        </div>
+                    `;
+                }
                 break;
                 
             case 'contact_agent':
